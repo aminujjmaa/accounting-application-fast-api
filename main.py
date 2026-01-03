@@ -768,6 +768,6 @@ def export_profit_loss_pdf(current_user: User = Depends(get_current_user), db: A
         headers={"Content-Disposition": "attachment; filename=profit_loss_statement.pdf"}
     )
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
