@@ -398,8 +398,12 @@ async def export_purchases_excel(
 
 #pdf and docx export endpoints can be added similarly
 @app.get("/export/sales/pdf")
-def export_sales_pdf(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    sales = db.query(SaleEntry).filter(SaleEntry.user_id == current_user.id).all()
+async def export_sales_pdf(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(SaleEntry).where(SaleEntry.user_id == current_user.id)
+    )
+    sales = result.scalars().all()
+
     
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
@@ -485,9 +489,12 @@ def export_sales_pdf(current_user: User = Depends(get_current_user), db: AsyncSe
 
 
 @app.get("/export/purchases/pdf")
-def export_purchases_pdf(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    purchases = db.query(PurchaseEntry).filter(PurchaseEntry.user_id == current_user.id).all()
-    
+async def export_purchases_pdf(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(PurchaseEntry).where(PurchaseEntry.user_id == current_user.id)
+    )
+    purchases = result.scalars().all()
+
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     elements = []
@@ -566,8 +573,11 @@ def export_purchases_pdf(current_user: User = Depends(get_current_user), db: Asy
 
 
 @app.get("/export/sales/word")
-def export_sales_word(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    sales = db.query(SaleEntry).filter(SaleEntry.user_id == current_user.id).all()
+async def export_sales_word(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(SaleEntry).where(SaleEntry.user_id == current_user.id)
+    )
+    sales = result.scalars().all()
     
     document = Document()
     
@@ -632,8 +642,11 @@ def export_sales_word(current_user: User = Depends(get_current_user), db: AsyncS
 
 
 @app.get("/export/purchases/word")
-def export_purchases_word(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    purchases = db.query(PurchaseEntry).filter(PurchaseEntry.user_id == current_user.id).all()
+async def export_purchases_word(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(PurchaseEntry).where(PurchaseEntry.user_id == current_user.id)
+    )
+    purchases = result.scalars().all()
     
     document = Document()
     
@@ -698,10 +711,17 @@ def export_purchases_word(current_user: User = Depends(get_current_user), db: As
 
 # Bonus: Combined Profit/Loss Report
 @app.get("/export/profit-loss/pdf")
-def export_profit_loss_pdf(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    sales = db.query(SaleEntry).filter(SaleEntry.user_id == current_user.id).all()
-    purchases = db.query(PurchaseEntry).filter(PurchaseEntry.user_id == current_user.id).all()
+async def export_profit_loss_pdf(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(SaleEntry).where(SaleEntry.user_id == current_user.id)
+    )
+    sales = result.scalars().all()
     
+    result = await db.execute(
+        select(PurchaseEntry).where(PurchaseEntry.user_id == current_user.id)
+    )
+    purchases = result.scalars().all()
+
     total_sales = sum(s.total_amount for s in sales)
     total_purchases = sum(p.total_amount for p in purchases)
     profit = total_sales - total_purchases
